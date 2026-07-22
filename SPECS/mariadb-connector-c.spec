@@ -7,7 +7,7 @@
 
 Name:           mariadb-connector-c
 Version:        3.4.4
-Release:        1%{?with_debug:.debug}%{?dist}
+Release:        2%{?with_debug:.debug}%{?dist}
 Summary:        The MariaDB Native Client library (C driver)
 License:        LGPL-2.1-or-later
 Source:         https://archive.mariadb.org/connector-c-%{version}/%{name}-%{version}-src.tar.gz
@@ -19,6 +19,9 @@ Url:            http://mariadb.org/
 %if %{with testsuite}
 Patch1:         testsuite.patch
 %endif
+
+# Source: https://github.com/mariadb-corporation/mariadb-connector-c/commit/1f168de4e09838ffe14da061142ed387541aa25d
+Patch2:         upstream_1f168de4e09838ffe14da061142ed387541aa25d.patch
 
 %if 0%{?flatpak}
 Requires:       %{name}-config = %{version}-%{release}
@@ -93,6 +96,7 @@ and require this package, so the /etc/my.cnf file is present.
 %if %{with testsuite}
 %patch -P1 -p1
 %endif
+%patch -P2 -p1
 
 # Remove unsused parts
 rm -r win win-iconv external/zlib
@@ -250,6 +254,9 @@ install -D -p -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/my.cnf.d/client.cnf
 #      Need to ensure, that the testsuite will also run properly on 'fedpkg local' buid, not damaging the host machine
 
 %changelog
+* Tue Jun 30 2026 Pavol Sloboda <psloboda@redhat.com> - 3.4.4-2
+- CVE-2026-44172 fix
+
 * Wed Feb 12 2025 Michal Schorm <mschorm@redhat.com> - 3.4.4-1
 - Rebase to 3.4.4
 
