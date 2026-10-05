@@ -15,7 +15,7 @@
 
 Name:           mariadb-connector-c
 Version:        3.2.6
-Release:        1%{?with_debug:.debug}%{?dist}
+Release:        2%{?with_debug:.debug}%{?dist}
 Summary:        The MariaDB Native Client library (C driver)
 License:        LGPLv2+
 Source:         https://downloads.mariadb.org/interstitial/connector-c-%{version}/%{name}-%{version}-src.tar.gz
@@ -27,6 +27,9 @@ Url:            http://mariadb.org/
 %if %{with testsuite}
 Patch1:         testsuite.patch
 %endif
+
+# Source: https://github.com/mariadb-corporation/mariadb-connector-c/commit/1f168de4e09838ffe14da061142ed387541aa25d
+Patch2:         upstream_1f168de4e09838ffe14da061142ed387541aa25d.patch
 
 Requires:       %{_sysconfdir}/my.cnf
 BuildRequires:  gcc-c++ cmake openssl-devel zlib-devel
@@ -96,6 +99,10 @@ and require this package, so the /etc/my.cnf file is present.
 %if %{with testsuite}
 %patch1 -p1
 %endif
+%patch2 -p1
+
+# Fix invalid CMake syntax: END() -> ENDIF()
+sed -i 's/^  END()/  ENDIF()/' cmake/ConnectorName.cmake
 
 # Remove unsused parts
 rm -r win win-iconv zlib
@@ -196,7 +203,7 @@ popd
 
 %files doc
 # Library manual pages
-%{_mandir}/man3/{mariadb,mysql}_*.3.*
+%{_mandir}/man3/{mariadb,mysql}_*.3*
 
 
 
@@ -250,6 +257,9 @@ popd
 #      Need to ensure, that the testsuite will also run properly on 'fedpkg local' buid, not damaging the host machine
 
 %changelog
+* Thu Sep 24 2026 Michal Schorm <mschorm@redhat.com> - 3.2.6-2
+- CVE-2026-44172 fix
+
 * Wed Feb 16 2022 Michal Schorm <mschorm@redhat.com> - 3.2.6-1
 - Rebase to 3.2.6
 - Introduction of a new '*-doc' subpackage
