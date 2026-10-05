@@ -3,7 +3,7 @@
 
 Name:           mariadb-connector-c
 Version:        3.1.11
-Release:        2%{?with_debug:.debug}%{?dist}
+Release:        3%{?with_debug:.debug}%{?dist}
 Summary:        The MariaDB Native Client library (C driver)
 License:        LGPLv2+
 Source:         https://downloads.mariadb.org/interstitial/connector-c-%{version}/mariadb-connector-c-%{version}-src.tar.gz
@@ -11,6 +11,9 @@ Source2:        my.cnf
 Source3:        client.cnf
 Url:            http://mariadb.org/
 # More information: https://mariadb.com/kb/en/mariadb/building-connectorc-from-source/
+
+# Source: https://github.com/mariadb-corporation/mariadb-connector-c/commit/1f168de4e09838ffe14da061142ed387541aa25d
+Patch2:         upstream_1f168de4e09838ffe14da061142ed387541aa25d.patch
 
 Requires:       %{_sysconfdir}/my.cnf
 BuildRequires:  zlib-devel cmake openssl-devel gcc-c++
@@ -58,6 +61,11 @@ and require this package, so the /etc/my.cnf file is present.
 
 %prep
 %setup -q -n %{name}-%{version}-src
+
+%patch2 -p1
+
+# Fix invalid CMake syntax: END() -> ENDIF()
+sed -i 's/^  END()/  ENDIF()/' cmake/ConnectorName.cmake
 
 # Remove unsused parts
 rm -r win zlib win-iconv
@@ -183,6 +191,9 @@ popd
 
 
 %changelog
+* Tue Sep 29 2026 Michal Schorm <mschorm@redhat.com> - 3.1.11-3
+- CVE-2026-44172 fix
+
 * Thu Dec 03 2020 Michal Schorm <mschorm@redhat.com> - 3.1.11-2
 - Require specific minimal version of the 'mariadb' package, if it is installed
 
